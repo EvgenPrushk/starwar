@@ -44,6 +44,12 @@ const blocks = [{
         width: 100,
         height: 20
     },
+    {
+        x: 250,
+        y: 50,
+        width: 100,
+        height: 20
+    },
 ];
 
 const limits = [
@@ -78,7 +84,7 @@ function loop(timestamp) {
             x: block.x - 10,
             y: block.y - 10,
             width: 10 + block.width,
-            height: 10 + block.height,
+            height: 10,
         };
 
         const ctrl2 = {
@@ -89,7 +95,7 @@ function loop(timestamp) {
         };
 
         const ctrl3 = {
-            x: block.x ,
+            x: block.x,
             y: block.y + block.height,
             width: block.width + 10,
             height: 10,
@@ -99,12 +105,14 @@ function loop(timestamp) {
             x: block.x - 10,
             y: block.y,
             width: 10,
-            height: 10 + block.height,
+            height: block.height + 10,
         };
 
-        if (condition) {
-            
+        if (isIntersection(ctrl1, ball) || isIntersection(ctrl3, ball)) {
+            ball.angle = Math.PI * 2 - ball.angle;
         }
+        else if(isIntersection(ctrl2, ball) || isIntersection(ctrl4, ball)) {
+            ball.angle = Math.PI - ball.angle;
 
         }
     }
@@ -181,4 +189,4 @@ function toggleItem (array, item) {
     } else {
         array.push(item);
     }
-}
+}}
