@@ -10,7 +10,7 @@ const ball = {
     width: 10,
     height: 10,
     speed: 100,
-    angel: Math.PI / 4 + Math.random() * Math.PI / 2,
+    angle: Math.PI / 4 + Math.random() * Math.PI / 2,
 };
 const platforma = {
     x: 10,
@@ -46,8 +46,13 @@ const blocks = [{
     },
 ];
 
+const limits = [
+    {x: 0, y: -10, width: canvas.width, height: 10},
+    {x: canvas.width, y: 0, width: 10, height: canvas.height},
+    {x: 0, y: canvas.height, width: canvas.width, height: 10},
+    {x: -10, y: 0, width: 10, height: canvas.height},
+];
 
-const limits = [];
 requestAnimationFrame(loop);
 
 let pTimestamp = 0;
@@ -62,18 +67,55 @@ function loop(timestamp) {
 
     clearCanvas();
 
-    ball.x += secondPart * ball.speed * Math.cos(ball.angel);
-    ball.y -= secondPart * ball.speed * Math.sin(ball.angel);
+    ball.x += secondPart * ball.speed * Math.cos(ball.angle);
+    ball.y -= secondPart * ball.speed * Math.sin(ball.angle);
     
     for (const block of blocks) {
         if (isIntersection(block, ball)) {
-            console.log(true);
+        toggleItem(blocks, block);
+
+        const ctrl1 = {
+            x: block.x - 10,
+            y: block.y - 10,
+            width: 10 + block.width,
+            height: 10 + block.height,
+        };
+
+        const ctrl2 = {
+            x: block.x + block.width,
+            y: block.y - 10,
+            width: 10,
+            height: 10 + block.height,
+        };
+
+        const ctrl3 = {
+            x: block.x ,
+            y: block.y + block.height,
+            width: block.width + 10,
+            height: 10,
+        };
+
+        const ctrl4 = {
+            x: block.x - 10,
+            y: block.y,
+            width: 10,
+            height: 10 + block.height,
+        };
+
+        if (condition) {
             
+        }
+
         }
     }
     
-   
-
+    if (isIntersection(limits[0], ball) || isIntersection(limits[2], ball)) {
+        ball.angle = Math.PI * 2 - ball.angle;
+    }
+    
+    if (isIntersection(limits[1], ball) || isIntersection(limits[3], ball)) {
+        ball.angle = Math.PI - ball.angle;
+    }
     drawRect(ball);
 
     for (const block of blocks) {
@@ -130,4 +172,13 @@ function isIntersection(blockA, blockB) {
         }
     }
     return false;
+}
+
+function toggleItem (array, item) {
+    if (array.includes(item)) {
+        const index = array.indexOf(item);
+        array.splice(index, 1);
+    } else {
+        array.push(item);
+    }
 }
