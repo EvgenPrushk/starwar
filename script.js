@@ -14,50 +14,88 @@ const ball = {
 };
 const platforma = {
     x: 10,
-    y: canvas.height - 10,
+    y: canvas.height - 30,
     width: 200,
-    height: 5,
+    height: 20,
     speed: 200,
+    leftKey: false,
+    rightKey: false,
 };
 
 const blocks = [{
         x: 50,
         y: 50,
-        width: 100,
+        width: 50,
         height: 20
     },
     {
         x: 100,
         y: 50,
-        width: 100,
+        width: 50,
         height: 20
     },
     {
         x: 150,
         y: 50,
-        width: 100,
+        width: 50,
         height: 20
     },
     {
         x: 200,
         y: 50,
-        width: 100,
+        width: 50,
         height: 20
     },
+
+];
+
+const limits = [{
+        x: 0,
+        y: -20,
+        width: canvas.width,
+        height: 20,
+    },
     {
-        x: 250,
-        y: 50,
-        width: 100,
-        height: 20
+        x: canvas.width,
+        y: 0,
+        width: 20,
+        height: canvas.height,
+    },
+    {
+        x: 0,
+        y: canvas.height,
+        width: canvas.width,
+        height: 20,
+    },
+    {
+        x: -20,
+        y: 0,
+        width: 20,
+        height: canvas.height
     },
 ];
 
-const limits = [
-    {x: 0, y: -10, width: canvas.width, height: 10},
-    {x: canvas.width, y: 0, width: 10, height: canvas.height},
-    {x: 0, y: canvas.height, width: canvas.width, height: 10},
-    {x: -10, y: 0, width: 10, height: canvas.height},
-];
+document.addEventListener("keydown", function (event) {
+    if(event.key === 'ArrowLeft') {
+        platforma.leftKey = true;
+    }
+
+    if(event.key === 'ArrowRight') {
+        platforma.rightKey = true;
+    }
+    
+});
+
+document.addEventListener("keyup", function (event) {
+    if(event.key === 'ArrowLeft') {
+        platforma.leftKey = false;
+    }
+
+    if(event.key === 'ArrowRight') {
+        platforma.rightKey = false;
+    }
+    
+});
 
 requestAnimationFrame(loop);
 
@@ -75,54 +113,65 @@ function loop(timestamp) {
 
     ball.x += secondPart * ball.speed * Math.cos(ball.angle);
     ball.y -= secondPart * ball.speed * Math.sin(ball.angle);
-    
+
+    if (platforma.leftKey) {
+        platforma.x = Math.max(0, platforma.x - secondPart * platforma.speed);
+    }
+    if (platforma.rightKey) {
+        platforma.x = Math.min(canvas.width - platforma.width, platforma.x + secondPart * platforma.speed);
+    }
+
     for (const block of blocks) {
         if (isIntersection(block, ball)) {
-        toggleItem(blocks, block);
+            toggleItem(blocks, block);
 
-        const ctrl1 = {
-            x: block.x - 10,
-            y: block.y - 10,
-            width: 10 + block.width,
-            height: 10,
-        };
+            const ctrl1 = {
+                x: block.x - 10,
+                y: block.y - 10,
+                width: 10 + block.width,
+                height: 10,
+            };
 
-        const ctrl2 = {
-            x: block.x + block.width,
-            y: block.y - 10,
-            width: 10,
-            height: 10 + block.height,
-        };
+            const ctrl2 = {
+                x: block.x + block.width,
+                y: block.y - 10,
+                width: 10,
+                height: 10 + block.height,
+            };
 
-        const ctrl3 = {
-            x: block.x,
-            y: block.y + block.height,
-            width: block.width + 10,
-            height: 10,
-        };
+            const ctrl3 = {
+                x: block.x,
+                y: block.y + block.height,
+                width: block.width + 10,
+                height: 10,
+            };
 
-        const ctrl4 = {
-            x: block.x - 10,
-            y: block.y,
-            width: 10,
-            height: block.height + 10,
-        };
+            const ctrl4 = {
+                x: block.x - 10,
+                y: block.y,
+                width: 10,
+                height: block.height + 10,
+            };
 
-        if (isIntersection(ctrl1, ball) || isIntersection(ctrl3, ball)) {
-            ball.angle = Math.PI * 2 - ball.angle;
-        }
-        else if(isIntersection(ctrl2, ball) || isIntersection(ctrl4, ball)) {
-            ball.angle = Math.PI - ball.angle;
+            if (isIntersection(ctrl1, ball) || isIntersection(ctrl3, ball)) {
+                ball.angle = Math.PI * 2 - ball.angle;
+            } else if (isIntersection(ctrl2, ball) || isIntersection(ctrl4, ball)) {
+                ball.angle = Math.PI - ball.angle;
 
+            }
         }
     }
-    
+
     if (isIntersection(limits[0], ball) || isIntersection(limits[2], ball)) {
         ball.angle = Math.PI * 2 - ball.angle;
     }
-    
+
     if (isIntersection(limits[1], ball) || isIntersection(limits[3], ball)) {
         ball.angle = Math.PI - ball.angle;
+    }
+
+    if(isIntersection(platforma, ball)) {
+        ball.angle = Math.PI * 2 - ball.angle;
     }
     drawRect(ball);
 
@@ -130,7 +179,7 @@ function loop(timestamp) {
         drawRect(block);
     }
 
-   
+    drawRect(platforma);
 }
 
 function clearCanvas() {
@@ -152,11 +201,22 @@ function drawRect(param) {
 }
 
 function isIntersection(blockA, blockB) {
-    const pointsA = [
-        {x: blockA.x, y: blockA.y},
-        {x: blockA.x + blockA.width, y: blockA.y},
-        {x: blockA.x, y: blockA.y + blockA.height},
-        {x: blockA.x + blockA.width, y: blockA.y+ blockA.height},
+    const pointsA = [{
+            x: blockA.x,
+            y: blockA.y
+        },
+        {
+            x: blockA.x + blockA.width,
+            y: blockA.y
+        },
+        {
+            x: blockA.x,
+            y: blockA.y + blockA.height
+        },
+        {
+            x: blockA.x + blockA.width,
+            y: blockA.y + blockA.height
+        },
     ];
 
     for (const pointA of pointsA) {
@@ -166,11 +226,22 @@ function isIntersection(blockA, blockB) {
         }
     }
 
-    const pointsB = [
-        {x: blockB.x, y: blockB.y},
-        {x: blockB.x + blockB.width, y: blockB.y},
-        {x: blockB.x, y: blockB.y + blockB.height},
-        {x: blockB.x + blockB.width, y: blockB.y+ blockB.height},
+    const pointsB = [{
+            x: blockB.x,
+            y: blockB.y
+        },
+        {
+            x: blockB.x + blockB.width,
+            y: blockB.y
+        },
+        {
+            x: blockB.x,
+            y: blockB.y + blockB.height
+        },
+        {
+            x: blockB.x + blockB.width,
+            y: blockB.y + blockB.height
+        },
     ];
 
     for (const pointB of pointsB) {
@@ -182,11 +253,11 @@ function isIntersection(blockA, blockB) {
     return false;
 }
 
-function toggleItem (array, item) {
+function toggleItem(array, item) {
     if (array.includes(item)) {
         const index = array.indexOf(item);
         array.splice(index, 1);
     } else {
         array.push(item);
     }
-}}
+}
