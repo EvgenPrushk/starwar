@@ -1,8 +1,15 @@
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
 
+
 canvas.width = 500;
 canvas.height = 500;
+
+let image = new Image();
+image.src = "sprite.png";
+
+
+
 
 const ball = {
     x: canvas.width / 2,
@@ -15,7 +22,7 @@ const ball = {
 const platforma = {
     x: 10,
     y: canvas.height - 30,
-    width: 200,
+    width: 150,
     height: 20,
     speed: 200,
     leftKey: false,
@@ -105,7 +112,7 @@ function loop(timestamp) {
 
     requestAnimationFrame(loop);
 
-    const dTimestamp = timestamp - pTimestamp;
+    const dTimestamp = Math.min(16.7, timestamp - pTimestamp);
     const secondPart = dTimestamp / 1000;
     pTimestamp = timestamp;
 
@@ -171,9 +178,12 @@ function loop(timestamp) {
     }
 
     if(isIntersection(platforma, ball)) {
-        ball.angle = Math.PI * 2 - ball.angle;
+        const x = ball.x + ball.width / 2;
+        const percent = (x - platforma.x) / platforma.width;
+        ball.angle = Math.PI  - Math.PI * 8 / 10 * (percent + 0.05);
     }
-    drawRect(ball);
+
+    drawBall(ball);
 
     for (const block of blocks) {
         drawRect(block);
@@ -260,4 +270,13 @@ function toggleItem(array, item) {
     } else {
         array.push(item);
     }
+}
+
+function drawBall (ball) {
+    context.beginPath();
+    context.drawImage(
+        image,
+        3, 587, 38, 38,        
+        ball.x, ball.y, ball.width, ball.height,
+    );
 }
