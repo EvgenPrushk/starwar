@@ -8,6 +8,53 @@ canvas.height = 500;
 let image = new Image();
 image.src = "sprite.png";
 
+let space = new Image();
+space.src = "space.jpg";
+
+const atlas = {
+    ball: {
+        x: 3,
+        y: 587,
+        width: 38,
+        height: 38,
+    },
+
+    yellow: {
+        x: 174,
+        y: 36,
+        width: 42,
+        height: 20,
+    },
+
+    red: {
+        x: 0,
+        y: 36,
+        width: 42,
+        height: 20,
+    },
+
+    green: {
+        x: 174,
+        y: 0,
+        width: 42,
+        height: 20,
+    },
+
+    pink: {
+        x: 116,
+        y: 36,
+        width: 42,
+        height: 20,
+    },
+
+    platforma: {
+        x: 108,
+        y: 176,
+        width: 210,
+        height: 18,
+    },
+};
+
 
 
 
@@ -16,7 +63,7 @@ const ball = {
     y: canvas.height - 50,
     width: 10,
     height: 10,
-    speed: 100,
+    speed: 300,
     angle: Math.PI / 4 + Math.random() * Math.PI / 2,
 };
 const platforma = {
@@ -29,32 +76,21 @@ const platforma = {
     rightKey: false,
 };
 
-const blocks = [{
-        x: 50,
-        y: 50,
-        width: 50,
-        height: 20
-    },
-    {
-        x: 100,
-        y: 50,
-        width: 50,
-        height: 20
-    },
-    {
-        x: 150,
-        y: 50,
-        width: 50,
-        height: 20
-    },
-    {
-        x: 200,
-        y: 50,
-        width: 50,
-        height: 20
-    },
+const blocks = [];
 
-];
+for (let x = 0; x < 8; x++) {
+    for (let y = 0; y < 10; y++) {
+        blocks.push({
+            x: 50 + 50 * x,
+            y: 50 + 20 * y,
+            width: 50,
+            height: 20,
+            color: getRandom(["red", "yellow", "green", "pink"]),
+        });
+
+    }
+
+}
 
 const limits = [{
         x: 0,
@@ -83,30 +119,31 @@ const limits = [{
 ];
 
 document.addEventListener("keydown", function (event) {
-    if(event.key === 'ArrowLeft') {
+    if (event.key === 'ArrowLeft') {
         platforma.leftKey = true;
     }
 
-    if(event.key === 'ArrowRight') {
+    if (event.key === 'ArrowRight') {
         platforma.rightKey = true;
     }
-    
+
 });
 
 document.addEventListener("keyup", function (event) {
-    if(event.key === 'ArrowLeft') {
+    if (event.key === 'ArrowLeft') {
         platforma.leftKey = false;
     }
 
-    if(event.key === 'ArrowRight') {
+    if (event.key === 'ArrowRight') {
         platforma.rightKey = false;
     }
-    
+
 });
 
 requestAnimationFrame(loop);
 
 let pTimestamp = 0;
+let plaing = true;
 
 function loop(timestamp) {
 
@@ -164,8 +201,8 @@ function loop(timestamp) {
                 ball.angle = Math.PI * 2 - ball.angle;
             } else if (isIntersection(ctrl2, ball) || isIntersection(ctrl4, ball)) {
                 ball.angle = Math.PI - ball.angle;
-
             }
+            break;
         }
     }
 
@@ -177,31 +214,24 @@ function loop(timestamp) {
         ball.angle = Math.PI - ball.angle;
     }
 
-    if(isIntersection(platforma, ball)) {
+    if (isIntersection(platforma, ball)) {
         const x = ball.x + ball.width / 2;
         const percent = (x - platforma.x) / platforma.width;
-        ball.angle = Math.PI  - Math.PI * 8 / 10 * (percent + 0.05);
+        ball.angle = Math.PI - Math.PI * 8 / 10 * (percent + 0.05);
     }
 
     drawBall(ball);
 
     for (const block of blocks) {
-        drawRect(block);
+        drawBlock(block);
     }
 
-    drawRect(platforma);
+    drawPlatforma(platforma);
 }
 
 function clearCanvas() {
-    canvas.width |= 0;
+    context.drawImage(space, 0, 0, canvas.width, canvas.height);
 }
-
-// drawRect(ball);
-// drawRect(platforma);
-
-// for (const block of blocks) {
-//     drawRect(block);
-// }
 
 function drawRect(param) {
     context.beginPath();
@@ -272,11 +302,34 @@ function toggleItem(array, item) {
     }
 }
 
-function drawBall (ball) {
+function drawBall(ball) {
     context.beginPath();
     context.drawImage(
         image,
-        3, 587, 38, 38,        
+        atlas.ball.x, atlas.ball.y, atlas.ball.width, atlas.ball.height,
         ball.x, ball.y, ball.width, ball.height,
     );
+}
+
+function drawBlock(block) {
+    context.beginPath();
+    context.drawImage(
+        image,
+        atlas[block.color].x, atlas[block.color].y, atlas[block.color].width, atlas[block.color].height,
+        block.x, block.y, block.width, block.height,
+    );
+}
+
+function drawPlatforma(platforma) {
+    context.beginPath();
+    context.drawImage(
+        image,
+        atlas.platforma.x, atlas.platforma.y, atlas.platforma.width, atlas.platforma.height,
+        platforma.x, platforma.y, platforma.width, platforma.height,
+    );
+}
+
+function getRandom(array) {
+    const index = Math.floor(Math.random() * array.length);
+    return array[index];
 }
